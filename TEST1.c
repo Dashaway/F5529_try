@@ -5,14 +5,21 @@
 
 //中断亮灯
 
+//定时器亮灯
+
+unsigned int I;
 
 void IO_SET();
+void TIMER_A_SET();
 
 void main(void)
 {
 	WDTCTL = WDTPW + WDTHOLD;
+	
 	//端口设置
 	IO_SET();
+	
+	TIMER_A_SET();
 	
 	P1OUT |= BIT0;
 	
@@ -40,6 +47,32 @@ void IO_SET()
 	P4DIR |= BIT7;
 
 }
+
+void TIMER_A_SET()
+{
+	//SMCLK，增计数，清除TAR
+	TA0CCTL0 = CCIE;
+	TA0CCR0 = 0xffff;
+	TA0CTL = TASSEL_2 + MC_1 + TACLR;
+	
+	
+}
+
+
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void TIMER_A(void)
+{
+	//TIMER_A中断
+	I++;
+	if(I == 16)
+	{
+		I = 0;
+		P1OUT ^= BIT0;
+	}
+	
+	
+}
+
 
 
 #pragma vector = PORT1_VECTOR
